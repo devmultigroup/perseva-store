@@ -1,0 +1,135 @@
+erDiagram
+    %% Supabase Auth (built-in)
+    auth_users {
+        uuid id PK
+        string email
+        timestamp created_at
+    }
+
+    %% Extended user profiles
+    profiles {
+        uuid id PK,FK
+        string full_name
+        string avatar_url
+        string phone
+        enum role "customer, admin"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    %% Product categories
+    categories {
+        uuid id PK
+        string name
+        string slug
+        string description
+        int sort_order
+        boolean is_active
+        timestamp created_at
+    }
+
+    %% Main products table
+    products {
+        uuid id PK
+        string name
+        string slug
+        text description
+        text short_description
+        uuid category_id FK
+        decimal base_price
+        string[] images
+        boolean is_active
+        boolean is_featured
+        int stock_quantity
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    %% Product variants (sizes, colors)
+    product_variants {
+        uuid id PK
+        uuid product_id FK
+        string name "e.g. S/M/L or Red/Blue"
+        string sku
+        decimal price_modifier
+        int stock_quantity
+        boolean is_active
+        timestamp created_at
+    }
+
+    %% Customer addresses
+    addresses {
+        uuid id PK
+        uuid user_id FK
+        string label "Home, Work, etc"
+        string full_name
+        string address_line1
+        string address_line2
+        string city
+        string state
+        string postal_code
+        string country
+        string phone
+        boolean is_default
+        timestamp created_at
+    }
+
+    %% Orders
+    orders {
+        uuid id PK
+        string order_number
+        uuid user_id FK
+        enum status "pending, paid, processing, shipped, delivered, cancelled"
+        decimal subtotal
+        decimal shipping_cost
+        decimal tax
+        decimal total
+        jsonb shipping_address
+        jsonb billing_address
+        string payment_intent_id
+        enum payment_status "pending, paid, failed, refunded"
+        text notes
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    %% Order line items
+    order_items {
+        uuid id PK
+        uuid order_id FK
+        uuid product_id FK
+        uuid variant_id FK
+        string product_name
+        string variant_name
+        decimal unit_price
+        int quantity
+        decimal total
+        timestamp created_at
+    }
+
+    %% Shopping cart (server-side persistence)
+    cart_items {
+        uuid id PK
+        uuid user_id FK
+        uuid product_id FK
+        uuid variant_id FK
+        int quantity
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    %% Relationships
+    auth_users ||--o| profiles : "extends"
+    profiles ||--o{ addresses : "has"
+    profiles ||--o{ orders : "places"
+    profiles ||--o{ cart_items : "has"
+    
+    categories ||--o{ products : "contains"
+    products ||--o{ product_variants : "has"
+    products ||--o{ order_items : "referenced in"
+    products ||--o{ cart_items : "added to"
+    
+    product_variants ||--o{ order_items : "referenced in"
+    product_variants ||--o{ cart_items : "added to"
+    
+    orders ||--|{ order_items : "contains"
