@@ -2,6 +2,31 @@ import { getProducts } from '@/lib/supabase/queries'
 import { formatPrice } from '@/lib/utils'
 import Link from 'next/link'
 import Image from 'next/image'
+import type { Metadata } from 'next'
+import { siteConfig } from '@/config/site'
+
+export const metadata: Metadata = {
+  title: 'Ana Sayfa',
+  description: 'Perseva Store&apos;a hoş geldiniz. Kaliteli ürünler, uygun fiyatlar. Öne çıkan ürünleri keşfedin ve en iyi fırsatları yakalayın.',
+  openGraph: {
+    title: 'Ana Sayfa | Perseva Store',
+    description: 'Kaliteli ürünler, uygun fiyatlar. Öne çıkan ürünleri keşfedin.',
+    url: siteConfig.url,
+    images: [
+      {
+        url: siteConfig.ogImage,
+        width: 1200,
+        height: 630,
+        alt: 'Perseva Store Ana Sayfa',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Ana Sayfa | Perseva Store',
+    description: 'Kaliteli ürünler, uygun fiyatlar.',
+  },
+}
 
 export default async function HomePage() {
   const featuredProducts = await getProducts(true)
@@ -12,7 +37,7 @@ export default async function HomePage() {
       <div className="container mx-auto px-4 py-8">
         {/* Hero Section */}
         <div className="mb-12 rounded-2xl bg-gradient-to-br from-gray-800 via-gray-700 to-gray-800 p-12 border border-gray-700 shadow-lg">
-          <h1 className="mb-4 text-5xl font-bold text-white">Perseva Store'a Hoş Geldiniz</h1>
+          <h1 className="mb-4 text-5xl font-bold text-white">Perseva Store&apos;a Hoş Geldiniz</h1>
           <p className="mb-6 text-xl text-gray-200">
             Kaliteli ürünler, uygun fiyatlar
           </p>

@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let response = NextResponse.next({
     request: {
       headers: request.headers,
@@ -16,7 +16,7 @@ export async function middleware(request: NextRequest) {
         get(name: string) {
           return request.cookies.get(name)?.value
         },
-        set(name: string, value: string, options: any) {
+        set(name: string, value: string, options: Record<string, unknown>) {
           request.cookies.set({
             name,
             value,
@@ -33,7 +33,7 @@ export async function middleware(request: NextRequest) {
             ...options,
           })
         },
-        remove(name: string, options: any) {
+        remove(name: string, options: Record<string, unknown>) {
           request.cookies.set({
             name,
             value: '',
@@ -60,14 +60,27 @@ export async function middleware(request: NextRequest) {
 
   // Admin rotalarını koru
   if (request.nextUrl.pathname.startsWith('/admin')) {
+    // Giriş yapmamış kullanıcıyı login sayfasına yönlendir (401 - Unauthorized durumu)
     if (!user) {
-      return NextResponse.redirect(new URL('/login', request.url))
+      const loginUrl = new URL('/login', request.url)
+      loginUrl.searchParams.set('redirectTo', request.nextUrl.pathname + request.nextUrl.search)
+      loginUrl.searchParams.set('error', 'unauthorized')
+      return NextResponse.redirect(loginUrl)
     }
-    
+
     // Admin kontrolü (kullanıcının role'ünü kontrol et)
-    // Bu kısmı Supabase'deki user metadata veya profiles tablosuna göre ayarlayın
-    // Örnek: const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-    // if (profile?.role !== 'admin') return NextResponse.redirect(new URL('/', request.url))
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    // Customer veya role'ü olmayan kullanıcı admin sayfalarına giremesin (403 - Forbidden durumu)
+    if (!profile || profile.role !== 'admin') {
+      const forbiddenUrl = new URL('/', request.url)
+      forbiddenUrl.searchParams.set('error', 'forbidden')
+      return NextResponse.redirect(forbiddenUrl)
+    }
   }
 
   // Dashboard rotalarını koru

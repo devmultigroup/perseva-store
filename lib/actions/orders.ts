@@ -111,8 +111,12 @@ export async function createOrder(
 
 export async function updateOrderStatus(orderId: string, status: string, paymentStatus?: string) {
   const supabase = await createClient()
-  
-  const updates: any = {
+
+  const updates: {
+    status: string
+    updated_at: string
+    payment_status?: string
+  } = {
     status,
     updated_at: new Date().toISOString(),
   }

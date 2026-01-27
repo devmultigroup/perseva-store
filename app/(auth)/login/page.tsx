@@ -3,7 +3,8 @@
 import { useActionState } from 'react'
 import { login } from '@/lib/actions/auth'
 import { Button } from '@/components/ui/button'
-import Link from 'next/link'
+import { Input } from '@/components/ui/input'
+import { AuthCard } from '@/components/ui/auth-card'
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
@@ -19,71 +20,47 @@ export default function LoginPage() {
   }, [state, router])
 
   return (
-    <div className="rounded-xl bg-white p-8 shadow-xl ring-1 ring-gray-200/50 backdrop-blur-sm">
-      <div className="mb-8 text-center">
-        <h1 className="mb-2 text-3xl font-bold text-gray-900">Giriş Yap</h1>
-        <p className="text-sm text-gray-600">Hesabınıza giriş yapın</p>
-      </div>
-      
-      {state?.error && (
-        <div className="mb-4 rounded-lg bg-red-50 border border-red-200 p-3">
-          <p className="text-sm text-red-600">{state.error}</p>
-        </div>
-      )}
-      
+    <AuthCard
+      title="Giriş Yap"
+      description="Hesabınıza giriş yapın"
+      errorMessage={state?.error}
+      footerText="Hesabınız yok mu?"
+      footerLinkHref="/register"
+      footerLinkLabel="Kayıt Ol"
+    >
       <form action={formAction} className="space-y-5">
         <div>
           <label htmlFor="email" className="mb-2 block text-sm font-medium text-gray-700">
             E-posta
           </label>
-          <input
+          <Input
             id="email"
             name="email"
             type="email"
             required
             placeholder="ornek@email.com"
             disabled={isPending}
-            className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm transition-colors focus:border-black focus:outline-none focus:ring-2 focus:ring-black/10 disabled:opacity-50 disabled:cursor-not-allowed"
           />
         </div>
-        
+
         <div>
           <label htmlFor="password" className="mb-2 block text-sm font-medium text-gray-700">
             Şifre
           </label>
-          <input
+          <Input
             id="password"
             name="password"
             type="password"
             required
             placeholder="••••••••"
             disabled={isPending}
-            className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm transition-colors focus:border-black focus:outline-none focus:ring-2 focus:ring-black/10 disabled:opacity-50 disabled:cursor-not-allowed"
           />
         </div>
-        
+
         <Button type="submit" className="w-full" size="lg" disabled={isPending}>
           {isPending ? 'Giriş yapılıyor...' : 'Giriş Yap'}
         </Button>
       </form>
-      
-      <div className="mt-6">
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300"></div>
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-white px-2 text-gray-500">veya</span>
-          </div>
-        </div>
-      </div>
-      
-      <p className="mt-6 text-center text-sm text-gray-600">
-        Hesabınız yok mu?{' '}
-        <Link href="/register" className="font-semibold text-black hover:text-gray-700 transition-colors">
-          Kayıt Ol
-        </Link>
-      </p>
-    </div>
+    </AuthCard>
   )
 }

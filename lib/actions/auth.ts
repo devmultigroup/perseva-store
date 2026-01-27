@@ -3,23 +3,29 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { loginSchema, registerSchema } from '@/schemas/auth.schema'
 
-export async function login(
-  prevState: { error?: string; success?: boolean } | null,
-  formData: FormData
-) {
+type AuthActionState = { error?: string; success?: boolean } | null
+
+export async function login(prevState: AuthActionState, formData: FormData) {
   const supabase = await createClient()
 
-  const data = {
-    email: formData.get('email') as string,
-    password: formData.get('password') as string,
+  const raw = {
+    email: formData.get('email'),
+    password: formData.get('password'),
   }
 
-  if (!data.email || !data.password) {
-    return { error: 'E-posta ve şifre gereklidir' }
+  const parsed = loginSchema.safeParse(raw)
+
+  if (!parsed.success) {
+    const firstError = parsed.error.issues[0]
+    const message = firstError?.message ?? 'Geçersiz giriş bilgileri'
+    return { error: message }
   }
 
-  const { error, data: authData } = await supabase.auth.signInWithPassword(data)
+  const { error, data: authData } = await supabase.auth.signInWithPassword(
+    parsed.data
+  )
 
   if (error) {
     // Türkçe hata mesajları
@@ -40,31 +46,35 @@ export async function login(
   return { error: 'Giriş yapılamadı' }
 }
 
-export async function signup(
-  prevState: { error?: string; success?: boolean } | null,
-  formData: FormData
-) {
+export async function signup(prevState: AuthActionState, formData: FormData) {
   const supabase = await createClient()
 
-  const data = {
-    email: formData.get('email') as string,
-    password: formData.get('password') as string,
+  const raw = {
+    full_name: formData.get('full_name'),
+    email: formData.get('email'),
+    password: formData.get('password'),
+    confirmPassword: formData.get('confirmPassword'),
+  }
+
+  const parsed = registerSchema.safeParse(raw)
+
+  if (!parsed.success) {
+    const firstError = parsed.error.issues[0]
+    const message = firstError?.message ?? 'Geçersiz kayıt bilgileri'
+    return { error: message }
+  }
+
+  const { full_name, email, password } = parsed.data
+
+  const { error, data: authData } = await supabase.auth.signUp({
+    email,
+    password,
     options: {
       data: {
-        full_name: formData.get('full_name') as string,
+        full_name,
       },
     },
-  }
-
-  if (!data.email || !data.password || !data.options.data.full_name) {
-    return { error: 'Tüm alanlar gereklidir' }
-  }
-
-  if (data.password.length < 6) {
-    return { error: 'Şifre en az 6 karakter olmalıdır' }
-  }
-
-  const { error, data: authData } = await supabase.auth.signUp(data)
+  })
 
   if (error) {
     let errorMessage = error.message

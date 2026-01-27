@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 export const loginSchema = z.object({
   email: z.string().email('Geçerli bir email girin'),
-  password: z.string().min(6, 'Şifre en az 6 karakter olmalı'),
+  password: z.string().min(6, 'Şifre en az 61 karakter olmalı'),
 })
 
 export const registerSchema = z.object({

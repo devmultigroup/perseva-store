@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { CartItemWithProduct } from '@/types'
 import { useAuth } from './use-auth'
@@ -10,34 +10,36 @@ export function useCartDB() {
   const [loading, setLoading] = useState(true)
   const { user } = useAuth()
 
-  useEffect(() => {
+  const fetchCart = useCallback(async () => {
     if (!user) {
       setItems([])
       setLoading(false)
       return
     }
 
-    const fetchCart = async () => {
-      try {
-        const supabase = createClient()
-        const { data, error } = await supabase
-          .from('cart_items')
-          .select('*, product:products(*), variant:product_variants(*)')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-
-        if (error) throw error
-        setItems(data || [])
-      } catch (err) {
-        console.error('Failed to fetch cart:', err)
-      } finally {
-        setLoading(false)
+    try {
+      const response = await fetch('/api/cart')
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch cart')
       }
-    }
 
+      const data = await response.json()
+      setItems(data || [])
+    } catch (err) {
+      console.error('Failed to fetch cart:', err)
+      setItems([])
+    } finally {
+      setLoading(false)
+    }
+  }, [user])
+
+  useEffect(() => {
     fetchCart()
 
-    // Subscribe to cart changes
+    if (!user) return
+
+    // Subscribe to cart changes (realtime)
     const supabase = createClient()
     const channel = supabase
       .channel('cart_changes')
@@ -58,7 +60,87 @@ export function useCartDB() {
     return () => {
       channel.unsubscribe()
     }
-  }, [user])
+  }, [user, fetchCart])
+
+  const addItem = async (productId: string, variantId?: string, quantity = 1) => {
+    try {
+      const response = await fetch('/api/cart', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product_id: productId, variant_id: variantId, quantity }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Sepete eklenemedi')
+      }
+
+      await fetchCart()
+      return { success: true }
+    } catch (error) {
+      console.error('Add to cart error:', error)
+      throw error
+    }
+  }
+
+  const updateQuantity = async (cartItemId: string, quantity: number) => {
+    try {
+      const response = await fetch(`/api/cart/${cartItemId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quantity }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Sepet güncellenemedi')
+      }
+
+      await fetchCart()
+      return { success: true }
+    } catch (error) {
+      console.error('Update cart error:', error)
+      throw error
+    }
+  }
+
+  const removeItem = async (cartItemId: string) => {
+    try {
+      const response = await fetch(`/api/cart/${cartItemId}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Sepetten silinemedi')
+      }
+
+      await fetchCart()
+      return { success: true }
+    } catch (error) {
+      console.error('Remove from cart error:', error)
+      throw error
+    }
+  }
+
+  const clearCart = async () => {
+    try {
+      const response = await fetch('/api/cart', {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Sepet temizlenemedi')
+      }
+
+      await fetchCart()
+      return { success: true }
+    } catch (error) {
+      console.error('Clear cart error:', error)
+      throw error
+    }
+  }
 
   const total = items.reduce((sum, item) => {
     const basePrice = item.product.base_price
@@ -69,5 +151,15 @@ export function useCartDB() {
 
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0)
 
-  return { items, loading, total, itemCount }
+  return { 
+    items, 
+    loading, 
+    total, 
+    itemCount,
+    addItem,
+    updateQuantity,
+    removeItem,
+    clearCart,
+    refetch: fetchCart,
+  }
 }
