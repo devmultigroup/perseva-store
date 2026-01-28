@@ -1,45 +1,30 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useCallback } from 'react';
+import useSWR from 'swr';
 import { createClient } from '@/lib/supabase/client';
 import type { CartItemWithProduct } from '@/types';
 import { useAuthContext } from '@/store/auth-context';
 
+const cartFetcher = async (): Promise<CartItemWithProduct[]> => {
+  const response = await fetch('/api/cart');
+  if (!response.ok) throw new Error('Failed to fetch cart');
+  return response.json();
+};
+
 export function useCartDB() {
-  const [items, setItems] = useState<CartItemWithProduct[]>([]);
-  const [loading, setLoading] = useState(true);
   const { user } = useAuthContext();
 
-  const fetchCart = useCallback(async () => {
-    if (!user) {
-      setItems([]);
-      setLoading(false);
-      return;
-    }
+  const {
+    data: items = [],
+    isLoading: loading,
+    mutate,
+  } = useSWR<CartItemWithProduct[]>(user ? '/api/cart' : null, cartFetcher);
 
-    try {
-      const response = await fetch('/api/cart');
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch cart');
-      }
-
-      const data = await response.json();
-      setItems(data || []);
-    } catch (err) {
-      console.error('Failed to fetch cart:', err);
-      setItems([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [user]);
-
+  // Subscribe to realtime cart changes
   useEffect(() => {
-    fetchCart();
-
     if (!user) return;
 
-    // Subscribe to cart changes (realtime)
     const supabase = createClient();
     const channel = supabase
       .channel('cart_changes')
@@ -52,7 +37,7 @@ export function useCartDB() {
           filter: `user_id=eq.${user.id}`,
         },
         () => {
-          fetchCart();
+          mutate();
         }
       )
       .subscribe();
@@ -60,14 +45,10 @@ export function useCartDB() {
     return () => {
       channel.unsubscribe();
     };
-  }, [user, fetchCart]);
+  }, [user, mutate]);
 
-  const addItem = async (
-    productId: string,
-    variantId?: string,
-    quantity = 1
-  ) => {
-    try {
+  const addItem = useCallback(
+    async (productId: string, variantId?: string, quantity = 1) => {
       const response = await fetch('/api/cart', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -83,16 +64,15 @@ export function useCartDB() {
         throw new Error(error.error || 'Sepete eklenemedi');
       }
 
-      await fetchCart();
+      // SWR will deduplicate with the realtime subscription's mutate()
+      await mutate();
       return { success: true };
-    } catch (error) {
-      console.error('Add to cart error:', error);
-      throw error;
-    }
-  };
+    },
+    [mutate]
+  );
 
-  const updateQuantity = async (cartItemId: string, quantity: number) => {
-    try {
+  const updateQuantity = useCallback(
+    async (cartItemId: string, quantity: number) => {
       const response = await fetch(`/api/cart/${cartItemId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -104,34 +84,43 @@ export function useCartDB() {
         throw new Error(error.error || 'Sepet güncellenemedi');
       }
 
-      await fetchCart();
+      await mutate();
       return { success: true };
-    } catch (error) {
-      console.error('Update cart error:', error);
-      throw error;
-    }
-  };
+    },
+    [mutate]
+  );
 
-  const removeItem = async (cartItemId: string) => {
-    try {
-      const response = await fetch(`/api/cart/${cartItemId}`, {
-        method: 'DELETE',
-      });
+  const removeItem = useCallback(
+    async (cartItemId: string) => {
+      // Optimistic update: remove item immediately from UI
+      const optimisticItems = items.filter((item) => item.id !== cartItemId);
+      mutate(optimisticItems, false);
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Sepetten silinemedi');
+      try {
+        const response = await fetch(`/api/cart/${cartItemId}`, {
+          method: 'DELETE',
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Sepetten silinemedi');
+        }
+
+        await mutate();
+        return { success: true };
+      } catch (error) {
+        // Revert on failure
+        await mutate();
+        throw error;
       }
+    },
+    [items, mutate]
+  );
 
-      await fetchCart();
-      return { success: true };
-    } catch (error) {
-      console.error('Remove from cart error:', error);
-      throw error;
-    }
-  };
+  const clearCart = useCallback(async () => {
+    // Optimistic update: clear immediately
+    mutate([], false);
 
-  const clearCart = async () => {
     try {
       const response = await fetch('/api/cart', {
         method: 'DELETE',
@@ -142,13 +131,14 @@ export function useCartDB() {
         throw new Error(error.error || 'Sepet temizlenemedi');
       }
 
-      await fetchCart();
+      await mutate();
       return { success: true };
     } catch (error) {
-      console.error('Clear cart error:', error);
+      // Revert on failure
+      await mutate();
       throw error;
     }
-  };
+  }, [mutate]);
 
   const total = items.reduce((sum, item) => {
     const basePrice = item.product.base_price;
@@ -168,6 +158,6 @@ export function useCartDB() {
     updateQuantity,
     removeItem,
     clearCart,
-    refetch: fetchCart,
+    refetch: mutate,
   };
 }

@@ -1,45 +1,39 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import useSWR from 'swr';
 import { createClient } from '@/lib/supabase/client';
 import type { Address } from '@/types';
 import { useAuthContext } from '@/store/auth-context';
 
+async function fetchAddresses(userId: string): Promise<Address[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('addresses')
+    .select('*')
+    .eq('user_id', userId)
+    .order('is_default', { ascending: false })
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data || [];
+}
+
 export function useAddresses() {
-  const [addresses, setAddresses] = useState<Address[]>([]);
-  const [loading, setLoading] = useState(true);
   const { user } = useAuthContext();
 
-  useEffect(() => {
-    if (!user) {
-      setAddresses([]);
-      setLoading(false);
-      return;
-    }
+  const { data, isLoading, error, mutate } = useSWR<Address[]>(
+    user ? ['addresses', user.id] : null,
+    ([, userId]) => fetchAddresses(userId as string)
+  );
 
-    const fetchAddresses = async () => {
-      try {
-        const supabase = createClient();
-        const { data, error } = await supabase
-          .from('addresses')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('is_default', { ascending: false })
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        setAddresses(data || []);
-      } catch (err) {
-        console.error('Failed to fetch addresses:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAddresses();
-  }, [user]);
-
+  const addresses = data || [];
   const defaultAddress = addresses.find((addr) => addr.is_default);
 
-  return { addresses, defaultAddress, loading };
+  return {
+    addresses,
+    defaultAddress,
+    loading: isLoading,
+    error: error?.message ?? null,
+    refetch: mutate,
+  };
 }

@@ -41,8 +41,8 @@ export default async function HomePage({
   if (!hasLocale(lang)) notFound();
   const dict = await getDictionary(lang);
 
-  const featuredProducts = await getProducts(true);
   const allProducts = await getProducts();
+  const featuredProducts = allProducts.filter((p) => p.is_featured);
 
   return (
     <div className="min-h-screen bg-gray-900">

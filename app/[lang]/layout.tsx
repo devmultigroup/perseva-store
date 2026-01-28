@@ -7,6 +7,7 @@ import { CartProvider } from '@/store/cart-context';
 import { hasLocale } from './dictionaries';
 import { siteConfig } from '@/config/site';
 import { PostHogProvider } from '@/app/providers/posthog';
+import { SWRProvider } from '@/lib/swr-config';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -62,9 +63,11 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} bg-white text-gray-900 antialiased`}
       >
         <PostHogProvider>
-          <AuthProvider>
-            <CartProvider>{children}</CartProvider>
-          </AuthProvider>
+          <SWRProvider>
+            <AuthProvider>
+              <CartProvider>{children}</CartProvider>
+            </AuthProvider>
+          </SWRProvider>
         </PostHogProvider>
       </body>
     </html>

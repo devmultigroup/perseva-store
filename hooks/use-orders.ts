@@ -1,42 +1,34 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import useSWR from 'swr';
 import { createClient } from '@/lib/supabase/client';
 import type { OrderWithItems } from '@/types';
 import { useAuthContext } from '@/store/auth-context';
 
+async function fetchOrders(userId: string): Promise<OrderWithItems[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('orders')
+    .select('*, order_items(*)')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data || [];
+}
+
 export function useOrders() {
-  const [orders, setOrders] = useState<OrderWithItems[]>([]);
-  const [loading, setLoading] = useState(true);
   const { user } = useAuthContext();
 
-  useEffect(() => {
-    if (!user) {
-      setOrders([]);
-      setLoading(false);
-      return;
-    }
+  const { data, isLoading, error, mutate } = useSWR<OrderWithItems[]>(
+    user ? ['orders', user.id] : null,
+    ([, userId]) => fetchOrders(userId as string)
+  );
 
-    const fetchOrders = async () => {
-      try {
-        const supabase = createClient();
-        const { data, error } = await supabase
-          .from('orders')
-          .select('*, order_items(*)')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        setOrders(data || []);
-      } catch (err) {
-        console.error('Failed to fetch orders:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchOrders();
-  }, [user]);
-
-  return { orders, loading };
+  return {
+    orders: data || [],
+    loading: isLoading,
+    error: error?.message ?? null,
+    refetch: mutate,
+  };
 }
