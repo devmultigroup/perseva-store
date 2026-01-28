@@ -5,6 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:cloudflare": "npx @opennextjs/cloudflare build",
+    "preview": "npm run build:cloudflare && npx wrangler dev",
+    "deploy": "npm run build:cloudflare && npx wrangler deploy",
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write .",
@@ -21,11 +24,12 @@
     ]
   },
   "dependencies": {
-    "next": "16.1.4",
+    "next": "^16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3"
   },
   "devDependencies": {
+    "@opennextjs/cloudflare": "^1.16.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -37,6 +41,7 @@
     "prettier": "^3.8.1",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wrangler": "^4.61.0"
   }
 }
