@@ -1,3 +1,4 @@
+// Status enums (labels are in i18n dictionaries)
 export const ORDER_STATUS = {
   PENDING: 'pending',
   PAID: 'paid',
@@ -7,15 +8,6 @@ export const ORDER_STATUS = {
   CANCELLED: 'cancelled',
 } as const
 
-export const ORDER_STATUS_LABELS = {
-  pending: 'Beklemede',
-  paid: 'Ödendi',
-  processing: 'İşleniyor',
-  shipped: 'Kargoya Verildi',
-  delivered: 'Teslim Edildi',
-  cancelled: 'İptal Edildi',
-} as const
-
 export const PAYMENT_STATUS = {
   PENDING: 'pending',
   PAID: 'paid',
@@ -23,22 +15,13 @@ export const PAYMENT_STATUS = {
   REFUNDED: 'refunded',
 } as const
 
-export const PAYMENT_STATUS_LABELS = {
-  pending: 'Bekliyor',
-  paid: 'Ödendi',
-  failed: 'Başarısız',
-  refunded: 'İade Edildi',
-} as const
-
 export const USER_ROLES = {
   CUSTOMER: 'customer',
   ADMIN: 'admin',
 } as const
 
-export const USER_ROLES_LABELS = {
-  customer: 'Müşteri',
-  admin: 'Yönetici',
-} as const
+// Note: Labels moved to i18n dictionaries (app/[lang]/dictionaries/*.json)
+// Use getDictionary(locale) to access translations
 
 export const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 export const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']

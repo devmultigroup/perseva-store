@@ -3,12 +3,12 @@
 import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { CartItemWithProduct } from '@/types'
-import { useAuth } from './use-auth'
+import { useAuthContext } from '@/store/auth-context'
 
 export function useCartDB() {
   const [items, setItems] = useState<CartItemWithProduct[]>([])
   const [loading, setLoading] = useState(true)
-  const { user } = useAuth()
+  const { user } = useAuthContext()
 
   const fetchCart = useCallback(async () => {
     if (!user) {

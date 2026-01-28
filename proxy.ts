@@ -1,7 +1,57 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+const locales = ['tr', 'en'] as const
+const defaultLocale: (typeof locales)[number] = 'tr'
+
+function getLocale(request: NextRequest): string {
+  // Check if locale exists in pathname
+  const { pathname } = request.nextUrl
+  const pathnameHasLocale = locales.some(
+    (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
+  )
+
+  if (pathnameHasLocale) {
+    return pathname.split('/')[1] || defaultLocale
+  }
+
+  // Try to get locale from Accept-Language header
+  const acceptLanguage = request.headers.get('accept-language')
+  if (acceptLanguage) {
+    // Simple detection: check if 'en' is preferred
+    if (acceptLanguage.toLowerCase().includes('en')) {
+      return 'en'
+    }
+  }
+
+  return defaultLocale
+}
+
 export async function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl
+
+  // Skip locale handling for API routes, static files, etc.
+  if (
+    pathname.startsWith('/api') ||
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/favicon') ||
+    pathname.match(/\.(ico|png|jpg|jpeg|svg|webp)$/)
+  ) {
+    // Continue with existing auth logic
+  } else {
+    // Check if pathname already has locale
+    const pathnameHasLocale = locales.some(
+      (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
+    )
+
+    if (!pathnameHasLocale) {
+      // Redirect to add locale
+      const locale = getLocale(request)
+      const newUrl = new URL(`/${locale}${pathname}`, request.url)
+      newUrl.search = request.nextUrl.search
+      return NextResponse.redirect(newUrl)
+    }
+  }
   let response = NextResponse.next({
     request: {
       headers: request.headers,
@@ -58,12 +108,18 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Admin rotalarını koru
-  if (request.nextUrl.pathname.startsWith('/admin')) {
+  // Extract locale from pathname for lang-aware redirects
+  const pathSegments = pathname.split('/').filter(Boolean)
+  const detectedLocale = pathSegments[0] && locales.includes(pathSegments[0] as typeof locales[number])
+    ? pathSegments[0]
+    : defaultLocale
+
+  // Admin rotalarını koru (lang-aware)
+  if (pathname.includes('/admin')) {
     // Giriş yapmamış kullanıcıyı login sayfasına yönlendir (401 - Unauthorized durumu)
     if (!user) {
-      const loginUrl = new URL('/login', request.url)
-      loginUrl.searchParams.set('redirectTo', request.nextUrl.pathname + request.nextUrl.search)
+      const loginUrl = new URL(`/${detectedLocale}/login`, request.url)
+      loginUrl.searchParams.set('redirectTo', pathname + request.nextUrl.search)
       loginUrl.searchParams.set('error', 'unauthorized')
       return NextResponse.redirect(loginUrl)
     }
@@ -77,24 +133,22 @@ export async function proxy(request: NextRequest) {
 
     // Customer veya role'ü olmayan kullanıcı admin sayfalarına giremesin (403 - Forbidden durumu)
     if (!profile || profile.role !== 'admin') {
-      const forbiddenUrl = new URL('/', request.url)
+      const forbiddenUrl = new URL(`/${detectedLocale}`, request.url)
       forbiddenUrl.searchParams.set('error', 'forbidden')
       return NextResponse.redirect(forbiddenUrl)
     }
   }
 
-  // Dashboard rotalarını koru
-  if (request.nextUrl.pathname.startsWith('/orders') || 
-      request.nextUrl.pathname.startsWith('/profile')) {
+  // Dashboard rotalarını koru (lang-aware)
+  if (pathname.includes('/orders') || pathname.includes('/profile')) {
     if (!user) {
-      return NextResponse.redirect(new URL('/login', request.url))
+      return NextResponse.redirect(new URL(`/${detectedLocale}/login`, request.url))
     }
   }
 
-  // Giriş yapmış kullanıcıyı auth sayfalarından yönlendir
-  if ((request.nextUrl.pathname.startsWith('/login') || 
-       request.nextUrl.pathname.startsWith('/register')) && user) {
-    return NextResponse.redirect(new URL('/', request.url))
+  // Giriş yapmış kullanıcıyı auth sayfalarından yönlendir (lang-aware)
+  if ((pathname.includes('/login') || pathname.includes('/register')) && user) {
+    return NextResponse.redirect(new URL(`/${detectedLocale}`, request.url))
   }
 
   return response

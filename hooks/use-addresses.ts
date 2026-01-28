@@ -3,12 +3,12 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { Address } from '@/types'
-import { useAuth } from './use-auth'
+import { useAuthContext } from '@/store/auth-context'
 
 export function useAddresses() {
   const [addresses, setAddresses] = useState<Address[]>([])
   const [loading, setLoading] = useState(true)
-  const { user } = useAuth()
+  const { user } = useAuthContext()
 
   useEffect(() => {
     if (!user) {

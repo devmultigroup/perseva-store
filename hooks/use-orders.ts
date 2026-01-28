@@ -3,12 +3,12 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { OrderWithItems } from '@/types'
-import { useAuth } from './use-auth'
+import { useAuthContext } from '@/store/auth-context'
 
 export function useOrders() {
   const [orders, setOrders] = useState<OrderWithItems[]>([])
   const [loading, setLoading] = useState(true)
-  const { user } = useAuth()
+  const { user } = useAuthContext()
 
   useEffect(() => {
     if (!user) {
