@@ -1,0 +1,73 @@
+{
+  "common": {
+    "loading": "Yükleniyor...",
+    "error": "Bir hata oluştu",
+    "success": "Başarılı",
+    "save": "Kaydet",
+    "cancel": "İptal",
+    "delete": "Sil",
+    "edit": "Düzenle",
+    "add": "Ekle",
+    "search": "Ara",
+    "filter": "Filtrele",
+    "sort": "Sırala",
+    "viewAll": "Tümünü Gör",
+    "description": "Açıklama"
+  },
+  "auth": {
+    "login": {
+      "title": "Giriş Yap",
+      "description": "Hesabınıza giriş yapın",
+      "email": "E-posta",
+      "password": "Şifre",
+      "submit": "Giriş Yap",
+      "submitting": "Giriş yapılıyor...",
+      "noAccount": "Hesabınız yok mu?",
+      "register": "Kayıt Ol"
+    },
+    "register": {
+      "title": "Kayıt Ol",
+      "description": "Yeni hesap oluşturun",
+      "fullName": "Ad Soyad",
+      "email": "E-posta",
+      "password": "Şifre",
+      "confirmPassword": "Şifre Tekrar",
+      "passwordHint": "Şifre en az 6 karakter olmalıdır",
+      "submit": "Kayıt Ol",
+      "submitting": "Kayıt oluşturuluyor...",
+      "hasAccount": "Zaten hesabınız var mı?",
+      "login": "Giriş Yap"
+    }
+  },
+  "order": {
+    "status": {
+      "pending": "Beklemede",
+      "paid": "Ödendi",
+      "processing": "İşleniyor",
+      "shipped": "Kargoya Verildi",
+      "delivered": "Teslim Edildi",
+      "cancelled": "İptal Edildi"
+    },
+    "paymentStatus": {
+      "pending": "Bekliyor",
+      "paid": "Ödendi",
+      "failed": "Başarısız",
+      "refunded": "İade Edildi"
+    }
+  },
+  "user": {
+    "roles": {
+      "customer": "Müşteri",
+      "admin": "Yönetici"
+    }
+  },
+  "shop": {
+    "home": {
+      "title": "Perseva Store'a Hoş Geldiniz",
+      "subtitle": "Kaliteli ürünler, uygun fiyatlar",
+      "cta": "Ürünleri Keşfet",
+      "featured": "Öne Çıkan Ürünler",
+      "allProducts": "Tüm Ürünler"
+    }
+  }
+}
