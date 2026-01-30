@@ -69,5 +69,14 @@
       "featured": "Öne Çıkan Ürünler",
       "allProducts": "Tüm Ürünler"
     }
+  },
+  "product": {
+    "variants": "Varyantlar",
+    "price": "Fiyat",
+    "stock": "Stok",
+    "outOfStock": "Tükendi",
+    "addToCart": "Sepete Ekle",
+    "addingToCart": "Ekleniyor...",
+    "loginToAdd": "Sepete eklemek için giriş yapın"
   }
 }

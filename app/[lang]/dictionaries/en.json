@@ -69,5 +69,14 @@
       "featured": "Featured Products",
       "allProducts": "All Products"
     }
+  },
+  "product": {
+    "variants": "Variants",
+    "price": "Price",
+    "stock": "Stock",
+    "outOfStock": "Out of stock",
+    "addToCart": "Add to Cart",
+    "addingToCart": "Adding...",
+    "loginToAdd": "Sign in to add to cart"
   }
 }
