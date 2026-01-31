@@ -100,3 +100,8 @@ export async function logout() {
   revalidatePath('/', 'layout');
   redirect('/');
 }
+
+/** Çıkış sonrası client-side logout'tan çağrılır; Next.js layout cache'ini invalide eder. */
+export async function revalidateAuth() {
+  revalidatePath('/', 'layout');
+}
