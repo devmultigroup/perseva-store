@@ -34,6 +34,9 @@ export function RegisterForm({ lang, dict }: { lang: Locale; dict: Dict }) {
 
   useEffect(() => {
     if (state?.success) {
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('auth:changed'));
+      }
       router.push(getLocalizedPath('/', lang));
       router.refresh();
     }

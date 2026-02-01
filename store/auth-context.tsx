@@ -18,13 +18,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const supabase = createClient();
 
-    // Mevcut kullanıcıyı al
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user ?? null);
-      setLoading(false);
-    });
+    const refreshUser = () => {
+      supabase.auth.getUser().then(({ data }) => {
+        setUser(data.user ?? null);
+        setLoading(false);
+      });
+    };
 
-    // Auth değişikliklerini dinle
+    // İlk yükleme
+    refreshUser();
+
+    // Auth değişikliklerini dinle (Supabase session)
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -32,8 +36,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
     });
 
+    // Server action (login/register/logout) sonrası client state senkronu
+    const handleAuthChanged = () => {
+      refreshUser();
+    };
+    if (typeof window !== 'undefined') {
+      window.addEventListener('auth:changed', handleAuthChanged);
+    }
+
     return () => {
       subscription.unsubscribe();
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('auth:changed', handleAuthChanged);
+      }
     };
   }, []);
 
