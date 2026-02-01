@@ -68,6 +68,20 @@
       "cta": "Explore Products",
       "featured": "Featured Products",
       "allProducts": "All Products"
+    },
+    "cart": {
+      "title": "Cart",
+      "backToProducts": "Back to products",
+      "empty": "Your cart is empty",
+      "emptyDescription": "Browse products to add items to your cart.",
+      "itemsCount": "Items",
+      "subtotal": "Subtotal",
+      "clearCart": "Clear cart",
+      "checkout": "Proceed to checkout",
+      "remove": "Remove",
+      "quantity": "Qty",
+      "loginToView": "Sign in to view your cart.",
+      "login": "Sign In"
     }
   }
 }

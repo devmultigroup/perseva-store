@@ -68,6 +68,20 @@
       "cta": "Ürünleri Keşfet",
       "featured": "Öne Çıkan Ürünler",
       "allProducts": "Tüm Ürünler"
+    },
+    "cart": {
+      "title": "Sepet",
+      "backToProducts": "Ürünlere dön",
+      "empty": "Sepetiniz boş",
+      "emptyDescription": "Sepetinize ürün eklemek için ürünlere göz atın.",
+      "itemsCount": "Ürün adedi",
+      "subtotal": "Ara Toplam",
+      "clearCart": "Sepeti temizle",
+      "checkout": "Ödemeye geç",
+      "remove": "Kaldır",
+      "quantity": "Adet",
+      "loginToView": "Sepetinizi görmek için giriş yapın.",
+      "login": "Giriş Yap"
     }
   }
 }

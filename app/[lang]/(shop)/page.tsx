@@ -67,14 +67,20 @@ export default async function HomePage({
             <h2 className="mb-6 text-3xl font-bold text-white">
               {dict.shop.home.featured}
             </h2>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div
+              className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4"
+              suppressHydrationWarning
+            >
               {featuredProducts.slice(0, 4).map((product) => (
                 <Link
                   key={product.id}
                   href={getLocalizedPath(`/products/${product.slug}`, lang)}
                   className="group overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all hover:border-gray-300 hover:shadow-lg"
                 >
-                  <div className="relative aspect-square w-full overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
+                  <div
+                    className="relative aspect-square w-full overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200"
+                    suppressHydrationWarning
+                  >
                     {product.images && product.images[0] ? (
                       <Image
                         src={product.images[0]}
@@ -84,7 +90,8 @@ export default async function HomePage({
                         className="object-cover transition-transform duration-300 group-hover:scale-105"
                         unoptimized={
                           product.images[0].startsWith('http') &&
-                          !product.images[0].includes('supabase')
+                          (!product.images[0].includes('supabase') ||
+                            product.images[0].includes('placehold.co'))
                         }
                       />
                     ) : (
