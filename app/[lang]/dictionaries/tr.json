@@ -83,5 +83,14 @@
       "loginToView": "Sepetinizi görmek için giriş yapın.",
       "login": "Giriş Yap"
     }
+  },
+  "product": {
+    "variants": "Varyantlar",
+    "price": "Fiyat",
+    "stock": "Stok",
+    "outOfStock": "Tükendi",
+    "addToCart": "Sepete Ekle",
+    "addingToCart": "Ekleniyor...",
+    "loginToAdd": "Sepete eklemek için giriş yapın"
   }
 }

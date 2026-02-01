@@ -29,12 +29,14 @@ export interface Product {
 export interface ProductVariant {
   id: string;
   product_id: string;
-  name: string; // e.g. "Small", "Red"
+  name: string;
   sku: string | null;
-  price_modifier: number; // ekstra fiyat (+/-)
+  price_modifier: number;
   stock_quantity: number;
   is_active: boolean;
   created_at: string;
+  /** Varyant bazlı görseller (örn. renk); seçilince galeride bunlar gösterilir */
+  images?: string[] | null;
 }
 
 export interface ProductWithVariants extends Product {

@@ -83,5 +83,14 @@
       "loginToView": "Sign in to view your cart.",
       "login": "Sign In"
     }
+  },
+  "product": {
+    "variants": "Variants",
+    "price": "Price",
+    "stock": "Stock",
+    "outOfStock": "Out of stock",
+    "addToCart": "Add to Cart",
+    "addingToCart": "Adding...",
+    "loginToAdd": "Sign in to add to cart"
   }
 }
