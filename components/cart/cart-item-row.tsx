@@ -40,9 +40,11 @@ export function CartItemRow({
   const unitPrice = getUnitPrice(item);
   const lineTotal = unitPrice * item.quantity;
   const imageUrl =
-    item.product.images && item.product.images.length > 0
-      ? item.product.images[0]
-      : null;
+    item.variant?.images && item.variant.images.length > 0
+      ? item.variant.images[0]
+      : item.product.images && item.product.images.length > 0
+        ? item.product.images[0]
+        : null;
 
   const handleQuantityChange = async (newQty: number) => {
     if (newQty < 1) return;
