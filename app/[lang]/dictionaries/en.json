@@ -89,6 +89,7 @@
     "price": "Price",
     "stock": "Stock",
     "outOfStock": "Out of stock",
+    "quantity": "Qty",
     "addToCart": "Add to Cart",
     "addingToCart": "Adding...",
     "loginToAdd": "Sign in to add to cart"

@@ -29,6 +29,23 @@ export async function getProducts(featured?: boolean) {
   return data as Product[];
 }
 
+export async function getProductsWithVariants(featured?: boolean) {
+  const supabase = await createClient();
+  let query = supabase
+    .from('products')
+    .select('*, category:categories(*), variants:product_variants(*)')
+    .eq('is_active', true)
+    .order('created_at', { ascending: false });
+
+  if (featured) {
+    query = query.eq('is_featured', true);
+  }
+
+  const { data, error } = await query;
+  if (error) throw error;
+  return data as ProductWithVariants[];
+}
+
 export async function getProductBySlug(slug: string) {
   const supabase = await createClient();
   const { data, error } = await supabase

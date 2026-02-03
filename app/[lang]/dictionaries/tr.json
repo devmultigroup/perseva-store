@@ -89,6 +89,7 @@
     "price": "Fiyat",
     "stock": "Stok",
     "outOfStock": "Tükendi",
+    "quantity": "Adet",
     "addToCart": "Sepete Ekle",
     "addingToCart": "Ekleniyor...",
     "loginToAdd": "Sepete eklemek için giriş yapın"
