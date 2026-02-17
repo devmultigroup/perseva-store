@@ -20,7 +20,7 @@ export const USER_ROLES = {
   ADMIN: 'admin',
 } as const;
 
-// Note: Labels moved to i18n dictionaries (app/[lang]/dictionaries/*.json)
+// Note: Labels moved to i18n dictionaries (lib/dictionaries/*.json)
 // Use getDictionary(locale) to access translations
 
 export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB

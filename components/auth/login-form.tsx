@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AuthCard } from '@/components/ui/auth-card';
 import { getLocalizedPath } from '@/lib/i18n';
-import type { Locale } from '@/app/[lang]/dictionaries';
+import type { Locale } from '@/lib/dictionaries';
 
 type Dict = {
   auth: {
@@ -34,7 +34,7 @@ export function LoginForm({ lang, dict }: { lang: Locale; dict: Dict }) {
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('auth:changed'));
       }
-      router.push(getLocalizedPath('/', lang));
+      router.push(getLocalizedPath('/'));
       router.refresh();
     }
   }, [state, router, lang]);
@@ -45,7 +45,7 @@ export function LoginForm({ lang, dict }: { lang: Locale; dict: Dict }) {
       description={dict.auth.login.description}
       errorMessage={state?.error}
       footerText={dict.auth.login.noAccount}
-      footerLinkHref={getLocalizedPath('/register', lang)}
+      footerLinkHref={getLocalizedPath('/register')}
       footerLinkLabel={dict.auth.login.register}
     >
       <form action={formAction} className="space-y-5">

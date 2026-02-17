@@ -1,10 +1,9 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
-import '../globals.css';
-import { notFound } from 'next/navigation';
+import './globals.css';
 import { AuthProvider } from '@/store/auth-context';
 import { CartProvider } from '@/store/cart-context';
-import { hasLocale } from './dictionaries';
+import { getLanguage } from '@/lib/i18n-server';
 import { siteConfig } from '@/config/site';
 import { PostHogProvider } from '@/app/providers/posthog';
 import { SWRProvider } from '@/lib/swr-config';
@@ -18,10 +17,6 @@ const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
 });
-
-export async function generateStaticParams() {
-  return [{ lang: 'tr' }, { lang: 'en' }];
-}
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
@@ -48,14 +43,10 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({
   children,
-  params,
 }: {
   children: React.ReactNode;
-  params: Promise<{ lang: string }>;
 }) {
-  const { lang } = await params;
-
-  if (!hasLocale(lang)) notFound();
+  const lang = await getLanguage();
 
   return (
     <html lang={lang} className="light">
