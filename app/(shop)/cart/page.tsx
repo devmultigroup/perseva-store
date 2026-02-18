@@ -5,5 +5,5 @@ import { CartContent } from '@/components/cart';
 export default async function CartPage() {
   const lang = await getLanguage();
   const dict = await getDictionary(lang);
-  return <CartContent lang={lang as 'tr' | 'en'} dict={dict} />;
+  return <CartContent dict={dict} />;
 }
