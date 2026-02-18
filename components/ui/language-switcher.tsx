@@ -1,28 +1,40 @@
 'use client';
 
-import { useParams, usePathname, useRouter } from 'next/navigation';
-import { getLocalizedPath, removeLocaleFromPath } from '@/lib/i18n';
-import type { Locale } from '@/app/[lang]/dictionaries';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/hooks/use-language';
+import type { Locale } from '@/lib/dictionaries';
 
+const COOKIE_NAME = 'NEXT_LOCALE';
 const locales: { code: Locale; label: string }[] = [
   { code: 'tr', label: 'TR' },
   { code: 'en', label: 'EN' },
 ];
 
 export function LanguageSwitcher() {
-  const params = useParams();
-  const pathname = usePathname();
   const router = useRouter();
-  const currentLang = (params?.lang as Locale) || 'tr';
+  const currentLang = useLanguage();
+  const [pendingLang, setPendingLang] = useState<Locale | null>(null);
+
+  useEffect(() => {
+    if (!pendingLang || pendingLang === currentLang) return;
+
+    if (typeof document !== 'undefined') {
+      // Cookie'yi effect içinde güncelle (lint için güvenli)
+      document.cookie = `${COOKIE_NAME}=${pendingLang}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`;
+    }
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('language-change'));
+    }
+
+    // URL değişmeden dili uygulamak için sayfayı yenile
+    router.refresh();
+  }, [pendingLang, currentLang, router]);
 
   const handleLanguageChange = (newLang: Locale) => {
     if (newLang === currentLang) return;
-
-    // Remove current locale from pathname
-    const pathWithoutLocale = removeLocaleFromPath(pathname);
-    // Add new locale
-    const newPath = getLocalizedPath(pathWithoutLocale, newLang);
-    router.push(newPath);
+    setPendingLang(newLang);
   };
 
   return (

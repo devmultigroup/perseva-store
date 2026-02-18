@@ -1,20 +1,17 @@
-import type { Locale } from '@/app/[lang]/dictionaries';
-
 /**
- * Creates a locale-aware path
- * @param path - Path without locale (e.g., '/products')
- * @param locale - Current locale (e.g., 'tr' or 'en')
- * @returns Locale-aware path (e.g., '/tr/products' or '/en/products')
+ * Creates a path without locale prefix
+ * @param path - Path (e.g., '/products')
+ * @returns Same path without locale (e.g., '/products')
  */
-export function getLocalizedPath(path: string, locale: Locale): string {
-  // Remove leading slash if present
-  const cleanPath = path.startsWith('/') ? path.slice(1) : path;
-  return `/${locale}/${cleanPath}`;
+export function getLocalizedPath(path: string): string {
+  // Remove leading slash if present, then add it back
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  return cleanPath;
 }
 
 /**
- * Removes locale from path
- * @param path - Path with locale (e.g., '/tr/products')
+ * Removes locale from path (for backward compatibility)
+ * @param path - Path (e.g., '/tr/products' or '/products')
  * @returns Path without locale (e.g., '/products')
  */
 export function removeLocaleFromPath(path: string): string {

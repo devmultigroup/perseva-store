@@ -1,17 +1,10 @@
-import { notFound } from 'next/navigation';
 import { getProductsWithVariants } from '@/lib/supabase/queries';
-import { hasLocale } from '../../dictionaries';
+import { getLanguage } from '@/lib/i18n-server';
 import { getLocalizedPath } from '@/lib/i18n';
 import { ProductCard } from '@/components/product';
 
-export default async function ProductsPage({
-  params,
-}: {
-  params: Promise<{ lang: string }>;
-}) {
-  const { lang } = await params;
-  if (!hasLocale(lang)) notFound();
-
+export default async function ProductsPage() {
+  const lang = await getLanguage();
   const products = await getProductsWithVariants();
 
   return (
@@ -24,7 +17,7 @@ export default async function ProductsPage({
           <ProductCard
             key={product.id}
             product={product}
-            productHref={getLocalizedPath(`/products/${product.slug}`, lang)}
+            productHref={getLocalizedPath(`/products/${product.slug}`)}
             showPrice
           />
         ))}

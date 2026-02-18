@@ -1,16 +1,15 @@
-import { notFound } from 'next/navigation';
 import { getProductBySlug } from '@/lib/supabase/queries';
-import { getDictionary, hasLocale } from '../../../dictionaries';
+import { getDictionary } from '@/lib/dictionaries';
+import { getLanguage } from '@/lib/i18n-server';
 import { ProductDetail } from '@/components/product-detail';
 
 export default async function ProductPage({
   params,
 }: {
-  params: Promise<{ lang: string; slug: string }>;
+  params: Promise<{ slug: string }>;
 }) {
-  const { lang, slug } = await params;
-  if (!hasLocale(lang)) notFound();
-
+  const { slug } = await params;
+  const lang = await getLanguage();
   const dict = await getDictionary(lang);
   const product = await getProductBySlug(slug);
 

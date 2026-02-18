@@ -1,24 +1,15 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { getProducts } from '@/lib/supabase/queries';
 import { formatPrice } from '@/lib/utils';
-import { getDictionary, hasLocale } from '../dictionaries';
+import { getDictionary } from '@/lib/dictionaries';
+import { getLanguage } from '@/lib/i18n-server';
 import { getLocalizedPath } from '@/lib/i18n';
 import { siteConfig } from '@/config/site';
 
-export async function generateStaticParams() {
-  return [{ lang: 'tr' }, { lang: 'en' }];
-}
-
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ lang: string }>;
-}): Promise<Metadata> {
-  const { lang } = await params;
-  if (!hasLocale(lang)) notFound();
+export async function generateMetadata(): Promise<Metadata> {
+  const lang = await getLanguage();
   const dict = await getDictionary(lang);
 
   return {
@@ -32,13 +23,8 @@ export async function generateMetadata({
   };
 }
 
-export default async function HomePage({
-  params,
-}: {
-  params: Promise<{ lang: string }>;
-}) {
-  const { lang } = await params;
-  if (!hasLocale(lang)) notFound();
+export default async function HomePage() {
+  const lang = await getLanguage();
   const dict = await getDictionary(lang);
 
   const allProducts = await getProducts();
@@ -55,7 +41,7 @@ export default async function HomePage({
             {dict.shop.home.subtitle}
           </p>
           <Link
-            href={getLocalizedPath('/products', lang)}
+            href={getLocalizedPath('/products')}
             className="inline-block rounded-lg bg-white px-8 py-3 font-semibold text-gray-900 shadow-md transition-all hover:scale-105 hover:bg-gray-100"
           >
             {dict.shop.home.cta}
@@ -74,7 +60,7 @@ export default async function HomePage({
               {featuredProducts.slice(0, 4).map((product) => (
                 <Link
                   key={product.id}
-                  href={getLocalizedPath(`/products/${product.slug}`, lang)}
+                  href={getLocalizedPath(`/products/${product.slug}`)}
                   className="group overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all hover:border-gray-300 hover:shadow-lg"
                 >
                   <div
@@ -120,7 +106,7 @@ export default async function HomePage({
               {dict.shop.home.allProducts}
             </h2>
             <Link
-              href={getLocalizedPath('/products', lang)}
+              href={getLocalizedPath('/products')}
               className="text-sm font-medium text-gray-300 transition-colors hover:text-white"
             >
               {dict.common.viewAll} →
@@ -130,7 +116,7 @@ export default async function HomePage({
             {allProducts.slice(0, 8).map((product) => (
               <Link
                 key={product.id}
-                href={getLocalizedPath(`/products/${product.slug}`, lang)}
+                href={getLocalizedPath(`/products/${product.slug}`)}
                 className="group overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all hover:border-gray-300 hover:shadow-lg"
               >
                 <div className="p-5">

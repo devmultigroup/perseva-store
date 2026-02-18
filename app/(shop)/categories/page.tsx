@@ -1,17 +1,11 @@
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
 import { getCategories } from '@/lib/supabase/queries';
-import { getDictionary, hasLocale } from '../../dictionaries';
+import { getDictionary } from '@/lib/dictionaries';
+import { getLanguage } from '@/lib/i18n-server';
 import { getLocalizedPath } from '@/lib/i18n';
 
-export default async function CategoriesPage({
-  params,
-}: {
-  params: Promise<{ lang: string }>;
-}) {
-  const { lang } = await params;
-  if (!hasLocale(lang)) notFound();
-
+export default async function CategoriesPage() {
+  const lang = await getLanguage();
   const dict = await getDictionary(lang);
   const categories = await getCategories();
 
@@ -24,7 +18,7 @@ export default async function CategoriesPage({
         {categories.map((c) => (
           <Link
             key={c.id}
-            href={getLocalizedPath(`/categories/${c.slug}`, lang)}
+            href={getLocalizedPath(`/categories/${c.slug}`)}
             className="rounded-lg border border-gray-200 bg-white p-4 hover:shadow"
           >
             <div className="font-semibold">{c.name}</div>

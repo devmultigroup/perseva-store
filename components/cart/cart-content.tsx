@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { useCartDB } from '@/hooks/use-cart-db';
 import { useAuthContext } from '@/store/auth-context';
 import { getLocalizedPath } from '@/lib/i18n';
-import type { Locale } from '@/app/[lang]/dictionaries';
 import { CartEmptyState } from '@/components/cart/cart-empty-state';
 import { CartItemRow } from '@/components/cart/cart-item-row';
 import { CartSummary } from '@/components/cart/cart-summary';
@@ -30,11 +29,10 @@ type CartContentDict = {
 };
 
 interface CartContentProps {
-  lang: Locale;
   dict: CartContentDict;
 }
 
-export function CartContent({ lang, dict }: CartContentProps) {
+export function CartContent({ dict }: CartContentProps) {
   const { user } = useAuthContext();
   const {
     items,
@@ -48,8 +46,8 @@ export function CartContent({ lang, dict }: CartContentProps) {
 
   const cartDict = dict.shop?.cart;
   if (!cartDict) throw new Error('Cart dictionary (shop.cart) is required');
-  const productsHref = getLocalizedPath('/products', lang);
-  const loginHref = getLocalizedPath('/login', lang);
+  const productsHref = getLocalizedPath('/products');
+  const loginHref = getLocalizedPath('/login');
 
   if (loading) {
     return (
@@ -107,8 +105,7 @@ export function CartContent({ lang, dict }: CartContentProps) {
                     quantity: cartDict.quantity,
                   }}
                   productHref={getLocalizedPath(
-                    `/products/${item.product.slug}`,
-                    lang
+                    `/products/${item.product.slug}`
                   )}
                   onQuantityChange={updateQuantity}
                   onRemove={removeItem}
